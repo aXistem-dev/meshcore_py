@@ -1,0 +1,18 @@
+[Unit]
+Description=MeshCore Serial to TCP Bridge
+After=network.target
+
+[Service]
+Type=simple
+User=dietpi
+WorkingDirectory=/opt/IonEngine5/MeshCore/meshcore_py/examples
+# Adjust the serial port if needed (check with: ls -l /dev/ttyUSB*)
+ExecStart=/usr/bin/python3 /opt/IonEngine5/MeshCore/meshcore_py/examples/serial_to_tcp_bridge.py --serial /dev/ttyUSB0 --port 5000 --baud 115200
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
