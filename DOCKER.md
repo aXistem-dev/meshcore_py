@@ -5,7 +5,7 @@
 ### Build Image
 
 ```bash
-docker build -t meshcore-bot:dev-axistem .
+docker build -t meshcore-alertbot:dev-axistem .
 ```
 
 ### Run Container
@@ -18,14 +18,14 @@ docker run -d \
   --name meshcore-bot \
   --restart unless-stopped \
   --device /dev/ttyUSB0:/dev/ttyUSB0 \
-  meshcore-bot:dev-axistem
+  meshcore-alertbot:dev-axistem
 
 # macOS example (if device passthrough works)
 docker run -d \
   --name meshcore-bot \
   --restart unless-stopped \
   --device /dev/cu.usbmodem90706983D6801:/dev/ttyUSB0 \
-  meshcore-bot:dev-axistem
+  meshcore-alertbot:dev-axistem
 ```
 
 **Note:** Inside the container, the device is always `/dev/ttyUSB0`. The host device path can be anything.
@@ -40,35 +40,25 @@ The workflow (`.github/workflows/docker-build.yml`) will:
 - Trigger on push to `dev-axistem` branch
 - Build the Docker image
 - Tag it as `dev-axistem`
-- Save as artifact (or push to registry if configured)
+- Push to GitHub Container Registry (ghcr.io)
 
-### Enabling Registry Push
+### Image Location
 
-To push to Docker Hub or another registry:
+Images are automatically pushed to:
+```
+ghcr.io/axistem-dev/meshcore-alertbot:dev-axistem
+```
 
-1. **Add secrets to GitHub:**
-   - Go to Settings → Secrets and variables → Actions
-   - Add `DOCKER_USERNAME` and `DOCKER_PASSWORD`
+### Pulling the Image
 
-2. **Update workflow file:**
-   ```yaml
-   - name: Log in to Docker Hub
-     uses: docker/login-action@v3
-     with:
-       username: ${{ secrets.DOCKER_USERNAME }}
-       password: ${{ secrets.DOCKER_PASSWORD }}
-   ```
+```bash
+docker pull ghcr.io/axistem-dev/meshcore-alertbot:dev-axistem
+```
 
-3. **Enable push:**
-   ```yaml
-   push: true  # Change from false to true
-   ```
-
-4. **Update image name:**
-   ```yaml
-   images: |
-     your-username/meshcore-bot
-   ```
+**Note:** For private repositories, you may need to authenticate:
+```bash
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+```
 
 ## Device Mapping
 
@@ -90,7 +80,7 @@ docker run -d \
   --name meshcore-bot \
   --restart unless-stopped \
   --device HOST_DEVICE:/dev/ttyUSB0 \
-  meshcore-bot:dev-axistem
+  meshcore-alertbot:dev-axistem
 ```
 
 ### With Directory Mount (for logs and config)
@@ -101,7 +91,7 @@ docker run -d \
   --restart unless-stopped \
   --device HOST_DEVICE:/dev/ttyUSB0 \
   -v $(pwd)/scripts/AlertBot:/app/scripts/AlertBot \
-  meshcore-bot:dev-axistem
+  meshcore-alertbot:dev-axistem
 ```
 
 ### Using docker-compose
@@ -141,7 +131,7 @@ docker logs -f meshcore-bot  # Follow logs
 ```bash
 docker run -it --rm \
   --device HOST_DEVICE:/dev/ttyUSB0 \
-  meshcore-bot:dev-axistem
+  meshcore-alertbot:dev-axistem
 ```
 
 ### Permission Issues

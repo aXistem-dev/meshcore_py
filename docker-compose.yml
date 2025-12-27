@@ -2,10 +2,13 @@ version: "3.8"
 
 services:
   meshcore-bot:
+    # Option 1: Build locally
     build:
       context: .
       dockerfile: Dockerfile
-    image: meshcore-bot:dev-axistem
+    # Option 2: Use image from GitHub Container Registry
+    # image: ghcr.io/axistem-dev/meshcore-alertbot:dev-axistem
+    image: meshcore-alertbot:dev-axistem
     container_name: meshcore-bot
     restart: unless-stopped
     # Pass through the serial device

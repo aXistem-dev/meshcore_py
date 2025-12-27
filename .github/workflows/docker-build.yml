@@ -8,53 +8,35 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
-      - name: Log in to Docker Hub (if using Docker Hub)
-        # Uncomment and configure if pushing to Docker Hub
-        # uses: docker/login-action@v3
-        # with:
-        #   username: ${{ secrets.DOCKER_USERNAME }}
-        #   password: ${{ secrets.DOCKER_PASSWORD }}
-      
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |
-            your-registry/meshcore-bot
-            # Or use Docker Hub: your-username/meshcore-bot
+            ghcr.io/${{ github.repository_owner }}/meshcore-alertbot
           tags: |
             type=raw,value=dev-axistem
-      
-      - name: Build Docker image
+
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: false  # Set to true if you want to push to registry
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # Build for current platform (linux/amd64)
-          # For multi-platform, use: platforms: linux/amd64,linux/arm64
-          # Note: Multi-platform builds can't be saved as tar artifacts
-      
-      - name: Save image artifact
-        run: |
-          # Get the image tag (first tag from metadata)
-          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
-          docker save $IMAGE_TAG -o meshcore-bot-dev-axistem.tar
-      
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image-dev-axistem
-          path: meshcore-bot-dev-axistem.tar
-          retention-days: 7
-

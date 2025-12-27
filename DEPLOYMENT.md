@@ -464,12 +464,10 @@ The Docker image is automatically built when you push to the `dev-axistem` branc
 - Multi-platform support (amd64, arm64)
 - Build cache for faster builds
 
-**To enable pushing to a registry:**
-1. Uncomment the Docker login step in `.github/workflows/docker-build.yml`
-2. Add secrets to GitHub:
-   - `DOCKER_USERNAME`
-   - `DOCKER_PASSWORD`
-3. Set `push: true` in the build step
+**Image Registry:**
+- Images are automatically pushed to GitHub Container Registry (ghcr.io)
+- Image: `ghcr.io/axistem-dev/meshcore-alertbot:dev-axistem`
+- Uses built-in `GITHUB_TOKEN` for authentication (no secrets needed)
 
 ### Manual Docker Build
 
@@ -477,7 +475,7 @@ Build the image locally:
 
 ```bash
 # From project root
-docker build -t meshcore-bot:dev-axistem -f Dockerfile .
+docker build -t meshcore-alertbot:dev-axistem -f Dockerfile .
 ```
 
 ### Running the Container
@@ -507,7 +505,7 @@ docker run -d \
   --name meshcore-bot \
   --restart unless-stopped \
   --device HOST_DEVICE:/dev/ttyUSB0 \
-  meshcore-bot:dev-axistem
+  meshcore-alertbot:dev-axistem
 
 # With directory mount (for logs and config)
 docker run -d \
@@ -515,7 +513,7 @@ docker run -d \
   --restart unless-stopped \
   --device HOST_DEVICE:/dev/ttyUSB0 \
   -v $(pwd)/scripts/AlertBot:/app/scripts/AlertBot \
-  meshcore-bot:dev-axistem
+  meshcore-alertbot:dev-axistem
 ```
 
 

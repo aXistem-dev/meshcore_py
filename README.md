@@ -664,13 +664,13 @@ For Docker-specific deployment, see **[DOCKER.md](DOCKER.md)**.
 Quick start:
 ```bash
 # Build image
-docker build -t meshcore-bot:dev-axistem .
+docker build -t meshcore-alertbot:dev-axistem .
 
 # Run container
 docker run -d --name meshcore-bot \
   --restart unless-stopped \
   --device /dev/ttyUSB0:/dev/ttyUSB0 \
-  meshcore-bot:dev-axistem \
+  meshcore-alertbot:dev-axistem \
   python bot.py /dev/ttyUSB0
 ```
 
