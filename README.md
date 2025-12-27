@@ -619,6 +619,69 @@ meshcore.subscribe(
 )
 ```
 
+## Utility Scripts
+
+The `scripts/` directory contains organized utility scripts for common tasks:
+
+### Production Scripts
+
+**`scripts/AlertBot/`** - Production alert bot
+- `bot.py`: Automated bot that sends messages to a channel at regular intervals (hourly cycles with multiple messages)
+  - Features: Persistent port configuration, auto-reconnection, connection monitoring
+  - Usage: `python scripts/AlertBot/bot.py [port] [channel_index]`
+
+### Configuration Scripts
+
+**`scripts/Configuration/`** - Device configuration utilities
+- `device_info.py`: Display comprehensive device information (model, firmware, battery, storage, etc.)
+  - Features: Interactive serial port selection, detailed device diagnostics
+  - Usage: `python scripts/Configuration/device_info.py [port]`
+  
+- `time_sync.py`: Check and synchronize device clock with system time
+  - Features: Time difference calculation, optional automatic synchronization
+  - Usage: `python scripts/Configuration/time_sync.py [--sync]`
+
+For more details, see `scripts/README.md`.
+
+## Production Deployment
+
+For deploying scripts to remote production machines, see **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
+The deployment guide covers:
+- Multiple deployment methods (git, rsync, package, **Docker**)
+- Process management (systemd, supervisor)
+- Configuration and permissions
+- Monitoring and logging
+- Troubleshooting
+- Quick deployment script
+
+### Docker Deployment
+
+**Automatic builds:** Docker images are automatically built when pushing to the `dev-axistem` branch.
+
+For Docker-specific deployment, see **[DOCKER.md](DOCKER.md)**.
+
+Quick start:
+```bash
+# Build image
+docker build -t meshcore-bot:dev-axistem .
+
+# Run container
+docker run -d --name meshcore-bot \
+  --restart unless-stopped \
+  --device /dev/ttyUSB0:/dev/ttyUSB0 \
+  meshcore-bot:dev-axistem \
+  python bot.py /dev/ttyUSB0
+```
+
+### Traditional Deployment
+
+Quick start:
+```bash
+# Use the deployment script
+./scripts/deploy.sh user@remote-host /opt/meshcore_py
+```
+
 ## Examples in the Repo
 
 Check the `examples/` directory for more:

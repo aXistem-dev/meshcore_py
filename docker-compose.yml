@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  meshcore-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: meshcore-bot:dev-axistem
+    container_name: meshcore-bot
+    restart: unless-stopped
+    # Pass through the serial device
+    # Map your host device to /dev/ttyUSB0 inside container
+    # Example: /dev/ttyUSB0:/dev/ttyUSB0 (Linux)
+    # Example: /dev/cu.usbmodem90706983D6801:/dev/ttyUSB0 (macOS)
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    # Mount AlertBot directory for logs and config persistence
+    volumes:
+      - ./scripts/AlertBot:/app/scripts/AlertBot
+    # Device is always /dev/ttyUSB0 inside container
+    command: ["python", "bot.py", "/dev/ttyUSB0"]
+    # Alternative: Use environment variable
+    # environment:
+    #   - MESHCORE_PORT=/dev/ttyUSB0
+    #   - MESHCORE_CHANNEL=0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
