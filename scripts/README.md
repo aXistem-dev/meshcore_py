@@ -12,6 +12,50 @@ python scripts/AlertBot/bot.py [port] [channel_index]
 
 `port` and `channel_index` are optional. The command can run without those arguments, where you will be asked which serial device you want to use. The default channel will be Channel `0` = Public channel
 
+**Setting Environment Variables (Local Python):**
+
+To configure the bot with environment variables when running locally, set them before running:
+
+**Linux/macOS:**
+```bash
+# Export variables in your shell
+export MESHCORE_CHANNEL_IDX=0
+export MESHCORE_MESSAGE_INTERVAL=300 # In seconds
+export MESHCORE_CYCLE_INTERVAL=180 # In minutes
+export MESHCORE_MESSAGES='["Message 1","Message 2"]'
+
+# Or inline with the command
+MESHCORE_MESSAGE_INTERVAL=300 MESHCORE_CYCLE_INTERVAL=180 python scripts/AlertBot/bot.py
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:MESHCORE_CHANNEL_IDX=0
+$env:MESHCORE_MESSAGE_INTERVAL=300 # In seconds
+$env:MESHCORE_CYCLE_INTERVAL=180 # In minutes
+$env:MESHCORE_MESSAGES='["Message 1","Message 2"]'
+python scripts/AlertBot/bot.py
+```
+
+**Windows (CMD):**
+```cmd
+set MESHCORE_CHANNEL_IDX=0
+set MESHCORE_MESSAGE_INTERVAL=300 # In seconds
+set MESHCORE_CYCLE_INTERVAL=180 # In Minutes
+set MESHCORE_MESSAGES=["Message 1","Message 2"]
+python scripts/AlertBot/bot.py
+```
+
+**Tip:** Create a shell script to load variables:
+```bash
+#!/bin/bash
+export MESHCORE_CHANNEL_IDX=0
+export MESHCORE_MESSAGE_INTERVAL=300 # In seconds
+export MESHCORE_CYCLE_INTERVAL=180 # In minutes
+export MESHCORE_MESSAGES='["Message 1","Message 2"]'
+python scripts/AlertBot/bot.py
+```
+
 **Docker Deployment:**
 ```bash
 # 1. Configure environment
