@@ -2,68 +2,120 @@
 
 ## Scripts
 
-### `test_device.py`
-Interactive device connection test and information display.
+### `AlertBot/bot.py`
+Alert bot that sends messages to a channel at configurable intervals.
 
-**Features:**
-- Interactive serial port selection (lists available ports)
-- Device information (model, firmware version, max contacts/channels)
-- Self information (device name, public key, coordinates)
-- Battery status (voltage and approximate percentage)
-- Storage information (used/total in MB/KB)
+**Local Usage:**
+```bash
+python scripts/AlertBot/bot.py [port] [channel_index]
+```
+
+`port` and `channel_index` are optional. The command can run without those arguments, where you will be asked which serial device you want to use. The default channel will be Channel `0` = Public channel
+
+**Docker Deployment:**
+```bash
+# 1. Configure environment
+cp scripts/AlertBot/meshcore-alertbot.env /path/to/deployment/
+# Edit meshcore-alertbot.env with your settings
+
+# 2. Deploy with Docker Compose
+docker compose -f stack-meshcore-alertbot.yaml up -d
+
+# 3. View logs
+docker logs -f meshcore-alertbot
+```
+
+**Configuration (via environment variables):**
+- `MESHCORE_CHANNEL_IDX` - Channel index (default: 0)
+- `MESHCORE_MESSAGE_INTERVAL` - Seconds between messages (default: 300)
+- `MESHCORE_CYCLE_INTERVAL` - Minutes between cycles (default: 180)
+- `MESHCORE_MESSAGES` - JSON array or newline-separated messages
+
+**Files:**
+- `stack-meshcore-alertbot.yaml` - Docker Compose stack file
+- `meshcore-alertbot.env` - Environment configuration template
+- `logs/bot.log` - Log file (mounted volume in Docker)
+
+---
+
+### `Configuration/device_info.py`
+Interactive device connection test and information display.
 
 **Usage:**
 ```bash
 # Interactive mode - lists available ports
-python scripts/test_device.py
+python scripts/Configuration/device_info.py
 
 # Direct port specification
-python scripts/test_device.py /dev/tty.usbmodem90706983D6801
+python scripts/Configuration/device_info.py /dev/ttyUSB0
 ```
+
+**Features:** Device info, firmware, battery, storage, coordinates
 
 ---
 
-### `channel_bot.py`
-Bot that sends messages to a channel at regular intervals (default: every 60 seconds).
+### `Configuration/time_sync.py`
+Check and sync device clock with system time.
 
 **Usage:**
 ```bash
-# Default: channel 0, default message, 60 second interval
-python scripts/channel_bot.py
+# Check sync status
+python scripts/Configuration/time_sync.py
 
-# Custom channel
-python scripts/channel_bot.py 1
-
-# Custom channel and message
-python scripts/channel_bot.py 0 "My custom bot message"
+# Sync if needed
+python scripts/Configuration/time_sync.py --sync
 ```
-
-**Configuration:** Edit `PORT`, `CHANNEL_IDX`, `MESSAGE`, or `INTERVAL_SECONDS` in the script.
 
 ---
 
-### `check_time_sync.py`
-Check if device clock is synchronized with system time, and optionally sync it.
+## Docker Deployment
 
-**Usage:**
-```bash
-# Check clock sync status
-python scripts/check_time_sync.py
+### AlertBot Quick Start
 
-# Check and sync if needed
-python scripts/check_time_sync.py --sync
-```
+1. **Prepare deployment directory:**
+   ```bash
+   mkdir -p /opt/meshcore-alertbot
+   cd /opt/meshcore-alertbot
+   ```
 
-**Features:**
-- Compares system time with device time
-- Shows difference in seconds/minutes/hours
-- Indicates if clocks are synced (within 5 seconds)
-- Optionally syncs device time to system time
+2. **Copy configuration files:**
+   ```bash
+   cp /path/to/meshcore_py/scripts/AlertBot/stack-meshcore-alertbot.yaml .
+   cp /path/to/meshcore_py/scripts/AlertBot/meshcore-alertbot.env .
+   mkdir -p meshcore-alertbot-data/logs
+   ```
+
+3. **Edit environment file:**
+   ```bash
+   nano meshcore-alertbot.env
+   # Set MESHCORE_DEVICE to your device path (e.g., /dev/ttyACM0)
+   # Configure messages, intervals, etc.
+   ```
+
+4. **Deploy:**
+   ```bash
+   docker compose -f stack-meshcore-alertbot.yaml pull
+   docker compose -f stack-meshcore-alertbot.yaml up -d
+   ```
+
+5. **Monitor:**
+   ```bash
+   docker logs -f meshcore-alertbot
+   # Or view log file
+   tail -f meshcore-alertbot-data/logs/bot.log
+   ```
+
+**Image:** `ghcr.io/axistem-dev/meshcore-alertbot:dev-axistem`
+
+**Volume Mounts:**
+- `./meshcore-alertbot-data/logs` → `/app/scripts/AlertBot/logs` (logs only)
+- Device: `${MESHCORE_DEVICE}` → `/dev/ttyUSB0` (inside container)
 
 ---
 
-## Configuration
+## Notes
 
-**Default port:** `/dev/tty.usbmodem90706983D6801` (edit `PORT` variable in each script to change)
-
-**Note:** On macOS, use `tty` version (not `cu`) for serial ports. The `test_device.py` script automatically prefers `tty` over `cu` versions.
+- Scripts use interactive port selection if no port is specified
+- Docker deployment requires device passthrough (Linux recommended)
+- Logs are stored in `logs/` subdirectory for cleaner volume management
+- All bot settings configurable via environment variables (no rebuild needed)
