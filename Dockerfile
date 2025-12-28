@@ -25,6 +25,9 @@ WORKDIR /app/scripts/AlertBot
 # Create default config file with container device path
 RUN echo '{"port": "/dev/ttyUSB0"}' > .config.json
 
+# Create logs directory
+RUN mkdir -p logs
+
 # Default command (can be overridden)
 CMD ["python", "bot.py"]
 

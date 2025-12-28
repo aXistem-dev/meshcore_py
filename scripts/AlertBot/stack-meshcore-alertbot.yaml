@@ -1,0 +1,24 @@
+name: stack-meshcore-alertbot
+services:
+  meshcore-alertbot:
+    image: ghcr.io/axistem-dev/meshcore-alertbot:dev-axistem
+    container_name: meshcore-alertbot
+    restart: unless-stopped
+    env_file: ./meshcore-alertbot.env
+    devices:
+      - ${MESHCORE_DEVICE:-/dev/ttyUSB0}:/dev/ttyUSB0
+    volumes:
+      - ./meshcore-alertbot-data/logs:/app/scripts/AlertBot/logs
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=${TZ:-Europe/Brussels}
+      - MESHCORE_CHANNEL_IDX=${MESHCORE_CHANNEL_IDX:-0}
+      - MESHCORE_MESSAGE_INTERVAL=${MESHCORE_MESSAGE_INTERVAL:-300} # in seconds
+      - MESHCORE_CYCLE_INTERVAL=${MESHCORE_CYCLE_INTERVAL:-180} # in minutes
+      - MESHCORE_MESSAGES=${MESHCORE_MESSAGES:-}
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "bot.py"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

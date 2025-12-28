@@ -16,13 +16,19 @@ from meshcore import MeshCore, EventType
 
 # Configuration
 BAUDRATE = 115200
-CHANNEL_IDX = 0  # Default to channel 0 (public channel)
-MESSAGE_INTERVAL_SECONDS = 15  # 15 seconds between messages
-CYCLE_INTERVAL_MINUTES = 60  # 1 hour between message cycles
+
+# Load configuration from environment variables with defaults
+CHANNEL_IDX = int(os.getenv('MESHCORE_CHANNEL_IDX', '0'))  # Default to channel 0 (public channel)
+MESSAGE_INTERVAL_SECONDS = int(os.getenv('MESHCORE_MESSAGE_INTERVAL', '15'))  # 15 seconds between messages
+CYCLE_INTERVAL_MINUTES = int(os.getenv('MESHCORE_CYCLE_INTERVAL', '60'))  # 1 hour between message cycles
 
 # Config file path (in same directory as script)
 CONFIG_FILE = Path(__file__).parent / ".config.json"
-LOG_FILE = Path(__file__).parent / "bot.log"
+
+# Log file in logs subdirectory
+LOGS_DIR = Path(__file__).parent / "logs"
+LOGS_DIR.mkdir(exist_ok=True)  # Create logs directory if it doesn't exist
+LOG_FILE = LOGS_DIR / "bot.log"
 
 # Setup logging to both console and file
 def setup_logging():
@@ -58,15 +64,30 @@ def setup_logging():
 # Initialize logging
 logger = setup_logging()
 
-# Messages to send (will be sent with 1 minute intervals)
-MESSAGES = [
-    "📻 Welkom op het MeshCore netwerk van Kortrijk! Je bent op de juiste plek.",
-    "🌐 Help ons het netwerk uitbreiden! Meer nodes = beter bereik voor iedereen.",
-    "💬 Stuur af en toe een bericht in dit publieke kanaal, zo weten we dat je er bent!",
-    "💬 Join onze Discord: https://discord.gg/kvybAgqnhD en chat met gelijkgestemden",
-    "🌍 Bezoek https://radio-actief.be - de actiefste radio community van België",
-    "🤖 Deze berichten herhalen zich elke uur."
-]
+# Messages to send - load from environment variable or use defaults
+def load_messages():
+    """Load messages from environment variable or return defaults"""
+    messages_env = os.getenv('MESHCORE_MESSAGES', '').strip()
+    if messages_env:
+        try:
+            # Try parsing as JSON array first
+            messages = json.loads(messages_env)
+            if isinstance(messages, list) and all(isinstance(m, str) for m in messages) and messages:
+                return messages
+        except (json.JSONDecodeError, ValueError):
+            # If not JSON, try newline-separated
+            messages = [m.strip() for m in messages_env.split('\n') if m.strip()]
+            if messages:
+                return messages
+    # Default messages
+    return [
+        "📻 Welcome to MeshCore! If you read this, you are not alone here.",
+        "🌐 Help us expand the network! More nodes = better coverage for everyone.",
+        "💬 Send a message in this public channel from time to time to let us know you are here!",
+        "🌍 This bot was made possible by https://Radio-Actief.be"
+    ]
+
+MESSAGES = load_messages()
 
 def load_saved_port():
     """Load saved port from config file"""
